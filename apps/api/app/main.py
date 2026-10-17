@@ -1,12 +1,14 @@
 from datetime import datetime,timedelta,timezone
 from enum import Enum
 from typing import Optional
+import os
 from fastapi import FastAPI,HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel,Field
 
 app=FastAPI(title="Haryana CMO Grievance API",version="0.1.0")
-app.add_middleware(CORSMiddleware,allow_origins=["http://localhost:3000"],allow_credentials=True,allow_methods=["*"],allow_headers=["*"])
+cors_origins=[x.strip() for x in os.getenv("CORS_ORIGINS","http://localhost:3000").split(",") if x.strip()]
+app.add_middleware(CORSMiddleware,allow_origins=cors_origins,allow_credentials=True,allow_methods=["*"],allow_headers=["*"])
 
 class Status(str,Enum):
  assigned="ASSIGNED"; in_progress="IN_PROGRESS"; awaiting="AWAITING_CITIZEN"; resolved="RESOLVED"; closed="CLOSED"
