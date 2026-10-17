@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: cmo
+      POSTGRES_USER: cmo
+      POSTGRES_PASSWORD: cmo
+    ports: ["5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cmo -d cmo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  api:
+    build: ./apps/api
+    environment:
+      DATABASE_URL: postgresql+psycopg://cmo:cmo@db:5432/cmo
+    ports: ["8000:8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+  web:
+    build: ./apps/web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports: ["3000:3000"]
+    depends_on: [api]
+volumes:
+  postgres_data:
